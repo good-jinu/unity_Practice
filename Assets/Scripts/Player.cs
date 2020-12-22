@@ -12,12 +12,15 @@ public class Player : MonoBehaviour
 
     bool isJump;
     bool isDodge;
+    bool enableDodge;
 
     Vector3 moveVec;
+    Vector3 dodgeVec;
     Rigidbody rigid;
     Animator anim;
     private void Awake()
     {
+        enableDodge = true;
         rigid = GetComponent<Rigidbody>();
         anim = GetComponentInChildren<Animator>();
     }
@@ -41,6 +44,9 @@ public class Player : MonoBehaviour
     void Move()
     {
         moveVec = new Vector3(hAxis, 0, vAxis).normalized;
+
+        if (isDodge)
+            moveVec = dodgeVec;
 
         transform.position += moveVec * speed * Time.deltaTime * (wDown ? 0.3f : 1f);
 
@@ -71,8 +77,9 @@ public class Player : MonoBehaviour
     }
     void Dodge()
     {
-        if (jDown && !isDodge && !isJump && moveVec!=Vector3.zero)
+        if (jDown && enableDodge && !isJump && moveVec!=Vector3.zero)
         {
+            dodgeVec = moveVec;
             speed *= 2f;
             anim.SetTrigger("doDodge");
             isDodge = true;
@@ -83,10 +90,11 @@ public class Player : MonoBehaviour
     void DodgeOut()
     {
         speed *= 0.5f;
-        Invoke("DodgeFalse", 2.5f);
+        isDodge = false;
+        Invoke("enableDodge", 2.5f);
     }
     void DodgeFalse()
     {
-        isDodge = false;
+        enableDodge = true;
     }
 }
